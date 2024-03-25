@@ -1,0 +1,5 @@
+{
+  "name": "@async/loader",
+  "version": "0.0.1",
+  "exports": "./loader.ts"
+}
