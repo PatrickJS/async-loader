@@ -1,3 +1,10 @@
+// global DOM types
+type IntersectionObserverEntry = any;
+type Node = any;
+type Document = any;
+type Element = any;
+type Comment = any;
+
 /** Emitted by qwik-loader when an element becomes visible. Used by `useVisibleTask$` @public */
 export type QwikVisibleEvent = CustomEvent<IntersectionObserverEntry>;
 /** Emitted by qwik-loader when a module was lazily loaded @public */
@@ -15,10 +22,6 @@ export interface QContainerElement {
   qFuncs?: Function[];
   _qwikjson_?: any;
 }
-
-type Node = any;
-type Document = any;
-type Element = any;
 
 export interface VirtualElement {
   readonly open: Comment;

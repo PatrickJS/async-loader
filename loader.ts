@@ -21,7 +21,7 @@ export const createEvent = <T extends CustomEvent = any>(
     detail,
   }) as T;
 
-export const qwikLoader = (doc: Document, hasInitialized?: number) => {
+export const qwikLoader = (doc: any, hasInitialized?: number) => {
   const Q_CONTEXT = "__q_context__";
   const QC = "_qc_";
   const qFuncs = "qFuncs";
@@ -43,14 +43,14 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
     return doc.querySelectorAll(query);
   };
 
-  const broadcast = (infix: string, ev: Event, type = ev.type) => {
-    querySelectorAll("[on-" + infix + "\\:" + type + "]")[forEach]((el) =>
+  const broadcast = (infix: string, ev: any, type = ev.type) => {
+    querySelectorAll("[on-" + infix + "\\:" + type + "]")[forEach]((el: any) =>
       dispatch(el, infix, ev, type)
     );
   };
 
-  const resolveContainer = (containerEl: Element) => {
-    if (containerEl[Q_JSON] === undefined) {
+  const resolveContainer = (containerEl: any) => {
+    if ((containerEl as any)[Q_JSON] === undefined) {
       const parentJSON =
         containerEl === doc.documentElement ? doc.body : containerEl;
       let script = parentJSON.lastElementChild;
@@ -59,7 +59,7 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
           script.tagName === "SCRIPT" &&
           script[getAttribute]("type") === TYPE_QWIK_JSON
         ) {
-          containerEl[Q_JSON] = JSON.parse(
+          (containerEl as any)[Q_JSON] = JSON.parse(
             script.textContent![replace](/\\x3C(\/?script)/gi, "<$1")
           );
           break;
@@ -70,7 +70,7 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
   };
 
   const dispatch = async (
-    element: Element,
+    element: any,
     onPrefix: string,
     ev: Event,
     eventName = ev.type
@@ -79,7 +79,7 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
     if (element.hasAttribute("preventdefault:" + eventName)) {
       ev.preventDefault();
     }
-    const ctx = element[QC] as QContext | undefined;
+    const ctx = (element as any)[QC] as QContext | undefined;
     const relevantListeners = ctx && ctx.li.filter((li) => li[0] === attrName);
     if (relevantListeners && relevantListeners.length > 0) {
       for (const listener of relevantListeners) {
@@ -109,10 +109,11 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
         // check if the symbol is synchronous
         // feat: sync: protocol for synchronous symbols
         const isSync = url.protocol === "sync:" || qrl.startsWith("#");
-        if (isSync && Array.isArray(container[qFuncs])) {
-          handler = container[qFuncs][Number.parseInt(symbolName, 10)];
+        if (isSync && Array.isArray((container as any)[qFuncs])) {
+          handler = (container as any)[qFuncs][Number.parseInt(symbolName, 10)];
         } else {
           const [uri] = url.href.split("#");
+          // @ts-ignore
           const factory = import(/* @vite-ignore */ uri);
           resolveContainer(container);
           const module = await factory;
@@ -160,7 +161,7 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
   const processDocumentEvent = async (ev: Event) => {
     // eslint-disable-next-line prefer-const
     let type = camelToKebab(ev.type);
-    let element = ev[target] as Element | null;
+    let element = ev[target] as any | null;
     broadcast("document", ev, type);
 
     while (element && element[getAttribute]) {
@@ -189,25 +190,27 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
 
       if (events.has(qvisible)) {
         const results = querySelectorAll("[on\\:" + qvisible + "]");
-        const observer = new IntersectionObserver((entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              observer.unobserve(entry[target]);
-              dispatch(
-                entry[target],
-                "",
-                createEvent<QwikVisibleEvent>(qvisible, entry)
-              );
+        const observer = new (window as any).IntersectionObserver(
+          (entries: any) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                observer.unobserve(entry[target]);
+                dispatch(
+                  entry[target],
+                  "",
+                  createEvent<QwikVisibleEvent>(qvisible, entry)
+                );
+              }
             }
           }
-        });
-        results[forEach]((el) => observer.observe(el));
+        );
+        results[forEach]((el: any) => observer.observe(el));
       }
     }
   };
 
   const addEventListener = (
-    el: Document | Window,
+    el: any | Window,
     eventName: string,
     handler: (ev: Event) => void,
     capture = false
