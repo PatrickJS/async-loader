@@ -108,6 +108,7 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
         const reqTime = performance.now();
         let handler: any;
         // check if the symbol is synchronous
+        // feat: sync: protocol for synchronous symbols
         const isSync = url.protocol === "sync:" || qrl.startsWith("#");
         if (isSync && Array.isArray(container[qFuncs])) {
           handler = container[qFuncs][Number.parseInt(symbolName, 10)];
