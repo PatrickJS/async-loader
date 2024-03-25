@@ -95,26 +95,35 @@ export const qwikLoader = (doc: Document, hasInitialized?: number) => {
     const attrValue = element[getAttribute](attrName);
     if (attrValue) {
       const container = element.closest(CONTAINER)!;
+      // get q:base which is base url for the container
       const base = new URL(container[getAttribute](BASE)!, doc.baseURI);
+      // split urls by newline
       const separator = "\n";
       for (const qrl of attrValue.split(separator)) {
+        // create full url
         const url = new URL(qrl, base);
+        // get symbol name
         const symbolName =
           url.hash[replace](/^#?([^?[|]*).*$/, "$1") || "default";
         const reqTime = performance.now();
         let handler: any;
-        const isSync = qrl.startsWith("#");
-        if (isSync) {
-          handler = (container[qFuncs] || [])[Number.parseInt(symbolName)];
+        // check if the symbol is synchronous
+        const isSync = url.protocol === "sync:" || qrl.startsWith("#");
+        if (isSync && Array.isArray(container[qFuncs])) {
+          handler = container[qFuncs][Number.parseInt(symbolName, 10)];
         } else {
-          const module = import(/* @vite-ignore */ url.href.split("#")[0]);
+          const [uri] = url.href.split("#");
+          const factory = import(/* @vite-ignore */ uri);
           resolveContainer(container);
-          handler = (await module)[symbolName];
+          const module = await factory;
+          handler = module[symbolName];
         }
+
         const previousCtx = doc[Q_CONTEXT];
         if (element[isConnected]) {
           try {
             doc[Q_CONTEXT] = [element, ev, url];
+            // emit event if symbol is async
             isSync ||
               emitEvent<QwikSymbolEvent>("qsymbol", {
                 symbol: symbolName,
