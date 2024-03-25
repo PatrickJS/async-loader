@@ -16,6 +16,10 @@ export interface QContainerElement {
   _qwikjson_?: any;
 }
 
+type Node = any;
+type Document = any;
+type Element = any;
+
 export interface VirtualElement {
   readonly open: Comment;
   readonly close: Comment;
