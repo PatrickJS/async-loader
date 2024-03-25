@@ -1,9 +1,8 @@
 import type {
   QwikSymbolEvent,
   QwikVisibleEvent,
-  QContainerElement,
   QContext,
-} from "./qwik-types";
+} from "./qwik-types.ts";
 
 /**
  * Set up event listening for browser.
