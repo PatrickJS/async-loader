@@ -1,2 +1,2 @@
 # @async/loader
-> redoing QwikLoader to be used with other frameworks if possible
+> WIP creating a new QwikLoader to be used with other frameworks if possible
